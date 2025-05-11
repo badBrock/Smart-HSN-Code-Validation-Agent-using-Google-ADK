@@ -1,0 +1,103 @@
+Project Documentation: Agentic Code Lookup Using Google Agent Development Kit
+
+This project demonstrates how to build an agent-based system using the Google Agent Development Kit that processes user-submitted code inputs and returns detailed hierarchical information. The task mimics a real-world scenario of querying an HS (Harmonized System) code and retrieving classification levels, including fallbacks to parent categories if the specific code is not found.
+
+1. Initial Understanding and Learning
+Before starting the development, I was already familiar with RAG (Retrieval-Augmented Generation), LLMs, and general concepts of agentic AI. However, the Google Agent Development Kit was new territory. Unlike previous experiences with Lantern and LangGraph, this required learning Google’s specific APIs and tools.
+
+I began by exploring the official documentation and working through the sample agent flows:
+
+Weather Agent
+
+Reimbursement Agent
+
+Capital City Agent
+
+These examples helped me grasp critical elements such as:
+
+Async/await patterns
+
+The event.part lifecycle
+
+Tool usage within the agent
+
+To fully understand the control flow, I dissected each example in VS Code, manually inserting print() statements to track function calls and value changes.
+
+2. Architecture and Flow
+The architecture follows this sequential agent pipeline:
+User Input (JSON) → call_agent_and_print → code_runner.run_async()
+→ code_agent (agent logic) → validateCode (tool) → Response formulation
+→ Final Output
+Step-by-step breakdown:
+
+User Input
+Input is received in JSON format, e.g., {"code": "010188"}.
+
+call_agent_and_print()
+
+Takes user JSON input.
+
+Constructs query content for the agent.
+
+Invokes run_async() on the code agent.
+
+code_runner.run_async()
+Passes the content to the code_agent for processing.
+
+Agent Logic (code_agent)
+
+Validates input using the schema (checks if the code is numeric).
+
+Uses the validateCode tool based on the intent.
+
+Tool Function: validateCode
+
+Parses and converts the string code to an integer (e.g., "010188" → 10188).
+
+Checks if int_code exists in a pre-defined dictionary (my_dict).
+
+If not found, recursively searches for parent codes using prefixes like "01", "0101", etc.
+
+Returns a message containing found parent codes or an error if no match.
+
+Final Agent Response
+
+Uses the tool output to format a human-readable response.
+
+Example:
+"The code '010188' was not found, but its parent codes exist: '01': 'LIVE ANIMALS', '0101': 'LIVE HORSES, ASSES, MULES AND HINNIES'."
+
+call_agent_and_print (Post-processing)
+
+Logs agent response.
+
+Updates session state (code_result).
+
+3. Data Preparation
+The core lookup functionality required transforming raw HS classification data into a searchable Python dictionary (my_dict). This was the hardest part of the project:
+
+Cleaned and parsed the source data.
+
+Manually converted it into nested key-value pairs.
+
+Optimized for fast prefix-based matching.
+
+4. Challenges Faced
+Grasping async architecture and state management within Google agents.
+
+Lack of detailed third-party support or examples outside Google’s docs , but there wasnt any.
+
+Navigating unfamiliar libraries used in the starter kits.
+
+Ensuring the tool and agent logic maintained modularity and extensibility.
+
+5. Outcome
+The final system performs intelligent hierarchical lookups of classification codes using agentic logic. It accurately returns:
+
+Exact matches
+
+Nearest parent codes (via prefix matching)
+
+Human-readable justifications
+
+This project not only deepened my understanding of agent frameworks but also gave hands-on experience in structuring modular, tool-augmented AI workflows.
